@@ -199,6 +199,39 @@ class E2E(unittest.TestCase):
             self.assertTrue(calls[1].startswith("exec resume --json --skip-git-repo-check abc-123 continue"), calls[1])
 
 
+class CommandTests(unittest.TestCase):
+    def test_resume_translates_sandbox_flag(self):
+        cmd = core.build_cmd("codex", "resume", "sid", False, "go", None, ["-s", "read-only", "-m", "x"])
+        self.assertNotIn("-s", cmd)
+        self.assertIn('sandbox_mode="read-only"', cmd)
+        self.assertEqual(cmd[-2:], ["sid", "go"])
+
+    def test_run_keeps_sandbox_flag(self):
+        cmd = core.build_cmd("codex", "run", None, False, "go", None, ["-s", "read-only"])
+        self.assertIn("-s", cmd)
+
+
+FAKE_FAIL = r'''
+import sys
+print("error: boom")
+sys.exit(2)
+'''
+
+
+class FailureTests(unittest.TestCase):
+    def test_failed_resume_is_recorded_as_failed(self):
+        with tempfile.TemporaryDirectory() as d:
+            d = Path(d)
+            t = dt.datetime.now() - dt.timedelta(minutes=20)
+            write_rollout(d / "sessions", "sf", [limit_event(t, msg_for(t + dt.timedelta(minutes=1)))])
+            w = make_fake(d, FAKE_FAIL)
+            p = cli("watch", "--once", "--buffer", "0", "--idle-guard", "0", "--sessions-dir", str(d / "sessions"),
+                    "--codex-bin", str(w), "--state", str(d / "s.json"), "--log", str(d / "l.log"), "--no-keep-awake")
+            self.assertEqual(p.returncode, 0, p.stdout + p.stderr)
+            st = json.loads((d / "s.json").read_text(encoding="utf-8"))
+            self.assertEqual([e["status"] for e in st["events"].values()], ["failed"])
+
+
 class AutostartTests(unittest.TestCase):
     def test_install_uninstall_roundtrip(self):
         with tempfile.TemporaryDirectory() as d:

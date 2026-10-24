@@ -210,8 +210,12 @@ def resume_one(entry: dict, state: State, opts, extra: list[str]) -> None:
     core.log(f"Auto-resume start: session {entry['sid']} (cwd={cwd})")
     try:
         res = core.run_codex(cmd, cwd)
-        entry["status"] = "done"
-        entry["result"] = "limit" if res.limit_message else "ok" if res.completed else f"exit={res.returncode}"
+        if res.limit_message:
+            entry["status"], entry["result"] = "done", "limit"
+        elif res.completed and res.returncode == 0:
+            entry["status"], entry["result"] = "done", "ok"
+        else:
+            entry["status"], entry["result"] = "failed", f"exit={res.returncode}"
     except Exception as e:  # noqa: BLE001
         entry["status"] = "failed"
         entry["result"] = repr(e)

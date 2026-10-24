@@ -161,6 +161,24 @@ def run_codex(cmd: list[str], cwd: str | None) -> Result:
     return res
 
 
+def resume_compatible(extra: list[str]) -> list[str]:
+    """`codex exec resume` rejects -s/--sandbox; express it as a config override instead."""
+    out: list[str] = []
+    i = 0
+    while i < len(extra):
+        a = extra[i]
+        if a in ("-s", "--sandbox") and i + 1 < len(extra):
+            out += ["-c", f'sandbox_mode="{extra[i + 1]}"']
+            i += 2
+        elif a.startswith("--sandbox="):
+            out += ["-c", f'sandbox_mode="{a.split("=", 1)[1]}"']
+            i += 1
+        else:
+            out.append(a)
+            i += 1
+    return out
+
+
 def build_cmd(codex: str, mode: str, session: str | None, last: bool, prompt: str,
               cwd: str | None, extra: list[str]) -> list[str]:
     cmd = [codex, "exec"]
@@ -170,7 +188,7 @@ def build_cmd(codex: str, mode: str, session: str | None, last: bool, prompt: st
             cmd += ["-C", cwd]
         cmd += extra + [prompt]
     else:
-        cmd += ["resume", "--json", "--skip-git-repo-check"] + extra
+        cmd += ["resume", "--json", "--skip-git-repo-check"] + resume_compatible(extra)
         cmd += ["--last"] if (last and not session) else [session] if session else []
         cmd += [prompt]
     return cmd
