@@ -1,0 +1,20 @@
+{
+  "name": "codex-autoresume",
+  "interface": {
+    "displayName": "Codex Autoresume"
+  },
+  "plugins": [
+    {
+      "name": "codex-autoresume",
+      "source": {
+        "source": "local",
+        "path": "./plugins/codex-autoresume"
+      },
+      "policy": {
+        "installation": "AVAILABLE",
+        "authentication": "ON_INSTALL"
+      },
+      "category": "Developer Tools"
+    }
+  ]
+}

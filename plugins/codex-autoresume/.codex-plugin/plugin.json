@@ -1,0 +1,27 @@
+{
+  "name": "codex-autoresume",
+  "version": "0.1.0",
+  "description": "Detect Codex sessions that stopped on a usage limit (5-hour or weekly) and automatically resume them when the limit resets.",
+  "author": {
+    "name": "IlleJiViN"
+  },
+  "license": "MIT",
+  "homepage": "https://github.com/IlleJiViN/codex-autoresume",
+  "repository": "https://github.com/IlleJiViN/codex-autoresume",
+  "keywords": ["codex", "usage-limit", "rate-limit", "resume", "automation", "scheduler"],
+  "skills": "./skills/",
+  "interface": {
+    "displayName": "Codex Autoresume",
+    "shortDescription": "Auto-resume work after a usage limit",
+    "longDescription": "Reads local Codex session logs to find sessions that stopped on a usage limit, waits for the exact reset time, then continues the same session with `codex exec resume`. Includes a background watcher, start-at-login support and a skill that sets it all up.",
+    "developerName": "IlleJiViN",
+    "websiteURL": "https://github.com/IlleJiViN/codex-autoresume",
+    "category": "Developer Tools",
+    "capabilities": ["Local CLI", "Task Scheduling", "Automation"],
+    "defaultPrompt": [
+      "Which of my Codex sessions are stalled on a usage limit right now?",
+      "Set up auto-resume so my work continues after the 5-hour limit resets.",
+      "Show what the auto-resume watcher has resumed so far."
+    ]
+  }
+}
